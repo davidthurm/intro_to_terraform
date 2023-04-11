@@ -90,19 +90,19 @@ resource "aws_security_group" "example" {
     from_port = 22
     to_port   = 22
     protocol  = "tcp"
-    cidr_blocks = ["66.211.22.97/32"] # Change this to your home ip
+    cidr_blocks = ["66.0.0.97/32"] # Change this to your home ip
   }
     ingress {
     from_port = 80
     to_port   = 80
     protocol  = "tcp"
-    cidr_blocks = ["66.211.22.97/32"] # Change this to your home ip
+    cidr_blocks = ["66.0.0.97/32"] # Change this to your home ip
   }
     ingress {
     from_port = 443
     to_port   = 443
     protocol  = "tcp"
-    cidr_blocks = ["66.211.22.97/32"] # Change this to your home ip
+    cidr_blocks = ["66.0.0.97/32"] # Change this to your home ip
   }
    egress {
     from_port   = 0
