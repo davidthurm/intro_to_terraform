@@ -1,4 +1,4 @@
-# Thirteen things Terraform needs to get your Instance to work
+# Eight things Terraform needs to get your Instance to work
 # 1: Terraform Provider
 # 2: VPC
 # 3: Internet Gateway
@@ -90,7 +90,7 @@ resource "aws_security_group" "example" {
     from_port = 22
     to_port   = 22
     protocol  = "tcp"
-    cidr_blocks = ["66.211.22.97/32"]
+    cidr_blocks = ["66.211.22.97/32"] # Change this to your home ip
   }
   tags = {
     Name = "dev-security-group"
@@ -145,7 +145,41 @@ resource "aws_instance" "example" {
   vpc_security_group_ids = [
     aws_security_group.example.id # Add the security group you created.
   ]
+  user_data = <<EOF
+#!/bin/bash
+sudo dnf --assumeyes update
+sudo dnf --assumeyes upgrade
+sudo dnf --assumeyes install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+### Install Firewalld ###
+sudo dnf --assumeyes install firewalld
+sudo systemctl start firewalld
+sudo systemctl enable firewalld
+sudo firewall-cmd --zone=public --permanent --add-service=ssh
+sudo firewall-cmd --zone=public --permanent --add-service=http
+sudo firewall-cmd --zone=public --permanent --add-service=https
+sudo systemctl reload firewalld
+
+### Intall Nginx ###
+sudo dnf --assumeyes install nginx
+sudo systemctl start nginx
+
+### Configure Nginx ###
+sudo mkdir -p /var/www/example.com/html
+sudo touch /var/www/example.com/html/index.html
+sudo chown -R  nginx:nginx /var/www/example.com/
+
+sudo cat > /var/www/example.com/html/index.html << EOF1
+<html>
+    <head>
+        <title>Welcome to Test Website!</title>
+    </head>
+    <body>
+        <p>It works!  Thank you for visiting</b>!</p>
+    </body>
+</html>
+EOF
 }
+
 ###############################################
 ## Print the Public IP to the Console Screen ##
 ###############################################
