@@ -92,6 +92,24 @@ resource "aws_security_group" "example" {
     protocol  = "tcp"
     cidr_blocks = ["66.211.22.97/32"] # Change this to your home ip
   }
+    ingress {
+    from_port = 80
+    to_port   = 80
+    protocol  = "tcp"
+    cidr_blocks = ["66.211.22.97/32"] # Change this to your home ip
+  }
+    ingress {
+    from_port = 443
+    to_port   = 443
+    protocol  = "tcp"
+    cidr_blocks = ["66.211.22.97/32"] # Change this to your home ip
+  }
+   egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"] ## Allow all outbound traffic
+  }
   tags = {
     Name = "dev-security-group"
   }
@@ -129,9 +147,10 @@ output "latest_amazon_linux_2_ami_id" {
 ####################################
 resource "aws_instance" "example" {
   ami           = data.aws_ami.latest_amazon_linux_2.id # Feed it the AMI you found
-  instance_type = "t2.micro"           # Choose the size/type of compute you want
-  key_name      = "dev-example-key"     # Here is the public key you want for ssh.
-  subnet_id     = aws_subnet.example.id # Put it on the Subnet you created.
+  instance_type = "m6i.xlarge"                # Choose the size/type of compute you want
+  iam_instance_profile = "SSMInstanceProfile" # Your Amazon Systems Manager Role
+  key_name      = "dev-example-key"           # Here is the public key you want for ssh.
+  subnet_id     = aws_subnet.example.id       # Put it on the Subnet you created.
   tags = {
     Name = "dev-amazon2023"
   }  
@@ -147,9 +166,11 @@ resource "aws_instance" "example" {
   ]
   user_data = <<EOF
 #!/bin/bash
+### Standard Patching
 sudo dnf --assumeyes update
 sudo dnf --assumeyes upgrade
 sudo dnf --assumeyes install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+
 ### Install Firewalld ###
 sudo dnf --assumeyes install firewalld
 sudo systemctl start firewalld
@@ -164,22 +185,21 @@ sudo dnf --assumeyes install nginx
 sudo systemctl start nginx
 
 ### Configure Nginx ###
-sudo mkdir -p /var/www/example.com/html
-sudo touch /var/www/example.com/html/index.html
-sudo chown -R  nginx:nginx /var/www/example.com/
+# sudo mkdir -p /var/www/example.com/html
+# sudo touch /var/www/example.com/html/index.html
+# sudo chown -R  nginx:nginx /var/www/example.com/
 
-sudo cat > /var/www/example.com/html/index.html << EOF1
-<html>
-    <head>
-        <title>Welcome to Test Website!</title>
-    </head>
-    <body>
-        <p>It works!  Thank you for visiting</b>!</p>
-    </body>
-</html>
+# sudo cat > /var/www/example.com/html/index.html << EOF1
+# <html>
+#     <head>
+#         <title>Welcome to Test Website!</title>
+#     </head>
+#     <body>
+#         <p>It works!  Thank you for visiting</b>!</p>
+#     </body>
+# </html>
 EOF
 }
-
 ###############################################
 ## Print the Public IP to the Console Screen ##
 ###############################################
