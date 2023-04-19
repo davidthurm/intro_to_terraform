@@ -185,19 +185,19 @@ sudo dnf --assumeyes install nginx
 sudo systemctl start nginx
 
 ### Configure Nginx ###
-# sudo mkdir -p /var/www/example.com/html
-# sudo touch /var/www/example.com/html/index.html
-# sudo chown -R  nginx:nginx /var/www/example.com/
+sudo rm /usr/share/nginx/html/index.html
+sudo touch /usr/share/nginx/html/index.html
+sudo chown -R  nginx:nginx /usr/share/nginx/html
 
-# sudo cat > /var/www/example.com/html/index.html << EOF1
-# <html>
-#     <head>
-#         <title>Welcome to Test Website!</title>
-#     </head>
-#     <body>
-#         <p>It works!  Thank you for visiting</b>!</p>
-#     </body>
-# </html>
+sudo cat > /usr/share/nginx/html/index.html << EOF1
+<html>
+    <head>
+        <title>Welcome to Test Website!</title>
+    </head>
+    <body>
+        <p>It works!  Thank you for visiting</b>!</p>
+    </body>
+</html>
 EOF
 }
 ###############################################
