@@ -1,1 +1,1 @@
-# dev_amazon2023
+# Terraform lab code for the Cloud 101 training course.
