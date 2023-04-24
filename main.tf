@@ -116,14 +116,6 @@ resource "aws_security_group" "example" {
   
   vpc_id = aws_vpc.example.id
 }
-#############################################################
-## We need to import in a public key you generated earlier ##
-## The public key file goes in your local terraform folder ##
-#############################################################
-resource "aws_key_pair" "example" {
-  key_name   = "dev-example-key"
-  public_key = file("./dev-example-key.pub")
-}
 ###########################################################################
 ## Does a search for the newest version of Amazon OS 2023                ##
 ## cli command: aws ec2 describe-images --image-id ami-06e46074ae430fba6 ##
@@ -147,7 +139,7 @@ output "latest_amazon_linux_2_ami_id" {
 ####################################
 resource "aws_instance" "example" {
   ami           = data.aws_ami.latest_amazon_linux_2.id # Feed it the AMI you found
-  instance_type = "m6i.xlarge"                # Choose the size/type of compute you want
+  instance_type = "t2.micro"                # Choose the size/type of compute you want
   iam_instance_profile = "SSMInstanceProfile" # Your Amazon Systems Manager Role
   key_name      = "dev-example-key"           # Here is the public key you want for ssh.
   subnet_id     = aws_subnet.example.id       # Put it on the Subnet you created.
@@ -168,13 +160,10 @@ resource "aws_instance" "example" {
 #!/bin/bash
 ### Standard Patching
 sudo dnf --assumeyes update
-sudo dnf --assumeyes upgrade
-sudo dnf --assumeyes install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 
 ### Install Firewalld ###
 sudo dnf --assumeyes install firewalld
-sudo systemctl start firewalld
-sudo systemctl enable firewalld
+sudo systemctl enable firewalld --now
 sudo firewall-cmd --zone=public --permanent --add-service=ssh
 sudo firewall-cmd --zone=public --permanent --add-service=http
 sudo firewall-cmd --zone=public --permanent --add-service=https
@@ -182,7 +171,7 @@ sudo systemctl reload firewalld
 
 ### Intall Nginx ###
 sudo dnf --assumeyes install nginx
-sudo systemctl start nginx
+sudo systemctl enable nginx --now
 
 ### Configure Nginx ###
 sudo rm /usr/share/nginx/html/index.html
