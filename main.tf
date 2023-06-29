@@ -1,4 +1,4 @@
-# Eight things Terraform needs to get your Instance to work
+# Thirteen things Terraform needs to get your Instance to work
 # 1: Terraform Provider
 # 2: VPC
 # 3: Internet Gateway
